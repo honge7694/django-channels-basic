@@ -24,7 +24,7 @@
             <div class="col-sm-12">
                 <div class="card" style="height: 600px;">
                     <div class="card-header">
-                        채팅방 : {{ room_name }}
+                        채팅방 : {{ room.name }}
                     </div>
                     <div class="card-body overflow-hidden">
                         <div id="chat_messages" class="w-100 h-100 border-0 overflow-scroll">
@@ -89,7 +89,7 @@
             },
             onerror() {
                 console.log("웹소켓 에러가 발생했습니다. 대기실로 이동합니다.");
-                window.location.href = "{% url 'chat:index' %}";
+                {% comment %} window.location.href = "{% url 'chat:index' %}"; {% endcomment %}
             },
             onmessage(evnet) {
                 const message_json = event.data;
