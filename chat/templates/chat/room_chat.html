@@ -13,6 +13,14 @@
             max-width: 80%;
             word-wrap: break-word;
         }
+        .chat-message.me {
+            text-align: right;
+        }
+        .chat-message.me > div {
+            background-color: #1f8cff;
+            color: #fff;
+            text-align: left;
+        }
     </style>
 {% endblock %}
 
@@ -79,7 +87,7 @@
                         this.retry += 1;
                         setTimeout(() => {
                             this.reconnect();
-                            consol.elog(`[${this.retry}] 접속 재시도...`);
+                            console.log(`[${this.retry}] 접속 재시도...`);
                         }, 1000 * this.retry)
                     }else{
                         console.log("웹소켓 서버에 접속할 수 없습니다. 대기실로 이동합니다.");
@@ -95,18 +103,26 @@
                 const message_json = event.data;
                 console.log("메세지 수신 :", message_json);
 
-                const { type, message } = JSON.parse(message_json);
+                const { type, message, sender } = JSON.parse(message_json);
                 switch(type) {
                     case "chat.message":
-                        this.append_message(message);
+                        this.append_message(message, sender);
                         break;
                     default:
                         console.error(`Invalid message type : ${type}`);
                 }
             },
-            append_message(message) {
+            append_message(message, sender) {
+                // 채팅내용
                 const element = document.createElement("div");
                 element.className = "chat-message";
+
+                let footer = "";
+                if (sender === "{{ user.username }}"){
+                    element.className += " me"
+                } else if(sender){
+                    footer = `from ${sender}`;
+                }
                 
                 const wrapper = document.createElement("div");
                 wrapper.textContent = message;
