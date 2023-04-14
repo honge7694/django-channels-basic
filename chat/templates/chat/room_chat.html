@@ -41,7 +41,7 @@
                     </div>
                     <div class="card-footer">
                         <form action="" id="message_form">
-                            <input type="text" name="message" class="form-control" autofocus autocomplete="off" />
+                        <input type="text" name="message" class="form-control" autofocus autocomplete="off" />
                         </form>
                     </div>
                 </div>
@@ -55,6 +55,25 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">알림</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra-script %}
     <script>
         const handlers = {
             chat_messages_tag: null,
@@ -84,7 +103,12 @@
                 this.retry = 0;
             },
             onclose(event) {
-                if(!event.wasClean){
+                const close_code = event.code;
+                if(close_code === 4000) {
+                    this.modal("채팅방이 삭제되었습니다. 대기실로 이동합니다.", () => {
+                        window.location.href = "{% url 'chat:index' %}";
+                    });
+                } else if(!event.wasClean) {
                     console.error("웹소켓 서버가 죽었거나, 네트워크 장애입니다.");
                     if(this.retry < 3){
                         this.retry += 1;
@@ -151,8 +175,21 @@
                     type: "chat.message",
                     message: message,
                 }));
-
             },
+            modal(message, ok_handler){
+                const modal_ele = document.querySelector("#staticBackdrop");
+                const body_ele = modal_ele.querySelector(".modal-body");
+                const button_ele = modal_ele.querySelector(".modal-footer button");
+
+                body_ele.textContent = message;
+
+                button_ele.addEventListener("click", () => {
+                    if(ok_handler) ok_handler();
+                });
+
+                const modal =new bootstrap.Modal(modal_ele);
+                modal.show();
+            }
         };
 
         handlers.init();
@@ -162,4 +199,4 @@
         handlers.connect(ws_url);
 
     </script>
-{% endblock %}
+{% endblock extra-script %}
