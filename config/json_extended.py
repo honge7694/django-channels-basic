@@ -18,5 +18,5 @@ class ExtendedJSONDecoder(json.JSONDecoder):
     @staticmethod
     def _object_hook(dct):
         if '__set__' in dct:
-            return set(dct('values'))
+            return set(dct['values'])
         return dct
